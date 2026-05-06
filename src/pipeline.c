@@ -125,30 +125,40 @@ void run_program(){
             decode ();
             printf("run_program: instruction %d decoded \n", ID.inst_id);
         }
+        //
+        // if (!IF.valid && !end_of_instructions){
+        //     fetch_inst();
+        //     if (IF.valid){
+        //         printf("run_program: instruction %d is fetched \n", IF.inst_id);
+        //     }
+        // } 
+        //
 
+        if (!IE.valid && ID.valid){
+            int hazard = is_data_hazard();
+            if (!hazard){
+            IE = ID;
+            IE.valid = 1;
+            ID.valid = 0;
+            printf("instruction %d is passed to execute phase \n", IE.inst_id);
+            }
+            else{ //HAZARD!
+                printf("run_program: Stalling pipeline due to hazard in instruction %d \n", ID.inst_id);
+                IE.valid = 0; //stall IE
+            }
+           
+        }
+        if (!ID.valid && IF.valid){
+            ID = IF;
+            ID.valid = 1;
+            IF.valid = 0;
+            printf("instruction %d is passed to decode phase \n", ID.inst_id);
+        }
         if (!IF.valid && !end_of_instructions){
             fetch_inst();
             if (IF.valid){
                 printf("run_program: instruction %d is fetched \n", IF.inst_id);
             }
-        }
-
-        if (!IE.valid && ID.valid){
-            IE = ID;
-
-            IE.valid = 1;
-            ID.valid = 0;
-
-            printf("instruction %d is passed to execute phase \n", IE.inst_id);
-        }
-
-        if (!ID.valid && IF.valid){
-            ID = IF;
-
-            ID.valid = 1;
-            IF.valid = 0;
-
-            printf("instruction %d is passed to decode phase \n", ID.inst_id);
         }
         
         fflush(stdout); // ensures text appears before sleeping
@@ -158,6 +168,38 @@ void run_program(){
     }
 }
 
+
+int is_data_hazard(){
+    if (!ID.valid || !IE.valid) return 0;
+    int ie_opcode = IE.opcode;
+    int id_opcode = ID.opcode;
+
+    if (ie_opcode==4 || ie_opcode==7||ie_opcode==11){
+        //4(BEQZ), 7(BR)(flush), 11(STR) No registers are written, so they can't cause hazards
+        //hazards are only caused by instructions that write to registers, so we can skip these
+        return 0;
+    }
+    int ex_dest = IE.r1; 
+    //check if ID reads R2
+    int id_reads_r1=(id_opcode!=3 && id_opcode!=10); //these inst overwrite R1
+    int id_reads_r2 = (id_opcode == 0 || id_opcode == 1 || id_opcode == 2 || id_opcode == 6 || id_opcode == 7 );
+    
+    if(id_reads_r1 && (ID.r1 == ex_dest)) {
+        printf("HAZARD DETECTED: Instruction %d depends on Instruction %d (R1)\n", ID.inst_id, IE.inst_id);
+        return 1;
+    }
+    if (id_reads_r2 && (ID.r2 == ex_dest)) {
+        printf("HAZARD DETECTED: Instruction %d depends on Instruction %d (R2)\n", ID.inst_id, IE.inst_id);
+        return 1;
+    }
+    // if (ID.r1 == ex_dest || ID.r1 == ex_dest ) {
+    //         printf("HAZARD DETECTED: Instruction %d depends on Instruction %d\n", ID.inst_id, IE.inst_id);
+    //         return 1;
+    //     }
+    
+    return 0;
+    
+}
 
 int main (){
     init_pipeline();
