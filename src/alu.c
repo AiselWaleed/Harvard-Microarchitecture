@@ -4,14 +4,16 @@
 #include <stdio.h>
 #define INST_MEM_SIZE 1024
 #include "../include/memory.h"
+
 #include "../include/pipeline.h"
+#include "memory.c"
 
 int zeroFlag;
 int carryFlag;
 int overflowFlag;
 int negativeFlag;
 int signFlag;
-int pc=0;
+
 
 /* added a global memory array because cases 10 and 11 (LB and SB)
    use mem[] but it was never declared anywhere in the original code.
@@ -211,13 +213,13 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
             break; 
             
         case 10:
-            operandA= load_memory(imm);
+            operandA= load_data(imm);
             outputD=operandA;
             break;
 
         case 11:
             store_data(operandA);
-            outputD=load_memory(imm);
+            outputD=load_data(imm);
             break;
      }
 
@@ -230,85 +232,85 @@ void printFlags(){
            carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
 }
 /*ask about how to deal with the PC and figure out their expected return type is it always binary or what?*/
- void main() {
-    int8_t result;
+// //  int main() {
+//     int8_t result;
 
-    /* CASE 0 — ADD: 5 + 3 = 8 */
-    result = Alu((int8_t)5, (int8_t)3, 0, (int8_t)0);
-    printf("Case 0 ADD (5+3):        output = %d  (expected 8)\n", result);
-    printFlags();
+//     /* CASE 0 — ADD: 5 + 3 = 8 */
+//     result = Alu((int8_t)5, (int8_t)3, 0, (int8_t)0);
+//     printf("Case 0 ADD (5+3):        output = %d  (expected 8)\n", result);
+//     printFlags();
 
-    /* CASE 0 — ADD carry: 127 + 1 = -128 in int8_t, carry=1 */
-    result = Alu((int8_t)127, (int8_t)1, 0, (int8_t)0);
-    printf("Case 0 ADD carry(127+1): output = %d  (expected -128, C=1, V=1)\n", result);
-    printFlags();
+//     /* CASE 0 — ADD carry: 127 + 1 = -128 in int8_t, carry=1 */
+//     result = Alu((int8_t)127, (int8_t)1, 0, (int8_t)0);
+//     printf("Case 0 ADD carry(127+1): output = %d  (expected -128, C=1, V=1)\n", result);
+//     printFlags();
 
-    /* CASE 1 — SUB: 7 - 2 = 5 */
-    result = Alu((int8_t)7, (int8_t)2, 1, (int8_t)0);
-    printf("Case 1 SUB (7-2):        output = %d  (expected 5)\n", result);
-    printFlags();
+//     /* CASE 1 — SUB: 7 - 2 = 5 */
+//     result = Alu((int8_t)7, (int8_t)2, 1, (int8_t)0);
+//     printf("Case 1 SUB (7-2):        output = %d  (expected 5)\n", result);
+//     printFlags();
 
-    /* CASE 1 — SUB zero: 4 - 4 = 0, Z=1 */
-    result = Alu((int8_t)4, (int8_t)4, 1, (int8_t)0);
-    printf("Case 1 SUB zero (4-4):   output = %d  (expected 0, Z=1)\n", result);
-    printFlags();
+//     /* CASE 1 — SUB zero: 4 - 4 = 0, Z=1 */
+//     result = Alu((int8_t)4, (int8_t)4, 1, (int8_t)0);
+//     printf("Case 1 SUB zero (4-4):   output = %d  (expected 0, Z=1)\n", result);
+//     printFlags();
 
-    /* CASE 2 — MUL: 3 * 4 = 12 */
-    result = Alu((int8_t)3, (int8_t)4, 2, (int8_t)0);
-    printf("Case 2 MUL (3*4):        output = %d  (expected 12)\n", result);
-    printFlags();
+//     /* CASE 2 — MUL: 3 * 4 = 12 */
+//     result = Alu((int8_t)3, (int8_t)4, 2, (int8_t)0);
+//     printf("Case 2 MUL (3*4):        output = %d  (expected 12)\n", result);
+//     printFlags();
 
-    /* CASE 3 — LDI: load immediate 21 into output */
-    result = Alu((int8_t)0, (int8_t)0, 3, (int8_t)21);
-    printf("Case 3 LDI (load 21):    output = %d  (expected 21)\n", result);
-    printFlags();
+//     /* CASE 3 — LDI: load immediate 21 into output */
+//     result = Alu((int8_t)0, (int8_t)0, 3, (int8_t)21);
+//     printf("Case 3 LDI (load 21):    output = %d  (expected 21)\n", result);
+//     printFlags();
 
-    /* CASE 4 — BEQZ taken: R1=0, IMM=5, pc=0 → pc = 0+1+5 = 6 */
-    pc = 0;
-    result = Alu((int8_t)0, (int8_t)0, 4, (int8_t)5);
-    printf("Case 4 BEQZ taken:       output = %d  (expected 6)\n", result);
-    printFlags();
+//     /* CASE 4 — BEQZ taken: R1=0, IMM=5, pc=0 → pc = 0+1+5 = 6 */
+//     pc = 0;
+//     result = Alu((int8_t)0, (int8_t)0, 4, (int8_t)5);
+//     printf("Case 4 BEQZ taken:       output = %d  (expected 6)\n", result);
+//     printFlags();
 
-    /* CASE 4 — BEQZ not taken: R1=1, pc=6 → pc = 6+1 = 7 */
-    result = Alu((int8_t)1, (int8_t)0, 4, (int8_t)5);
-    printf("Case 4 BEQZ not taken:   output = %d  (expected 7)\n", result);
-    printFlags();
+//     /* CASE 4 — BEQZ not taken: R1=1, pc=6 → pc = 6+1 = 7 */
+//     result = Alu((int8_t)1, (int8_t)0, 4, (int8_t)5);
+//     printf("Case 4 BEQZ not taken:   output = %d  (expected 7)\n", result);
+//     printFlags();
 
-    /* CASE 5 — AND: 15 & 6 = 6 */
-    result = Alu((int8_t)15, (int8_t)6, 5, (int8_t)0);
-    printf("Case 5 AND (15 & 6):     output = %d  (expected 6)\n", result);
-    printFlags();
+//     /* CASE 5 — AND: 15 & 6 = 6 */
+//     result = Alu((int8_t)15, (int8_t)6, 5, (int8_t)0);
+//     printf("Case 5 AND (15 & 6):     output = %d  (expected 6)\n", result);
+//     printFlags();
 
-    /* CASE 6 — OR: 10 | 5 = 15 */
-    result = Alu((int8_t)10, (int8_t)5, 6, (int8_t)0);
-    printf("Case 6 OR  (10 | 5):     output = %d  (expected 15)\n", result);
-    printFlags();
+//     /* CASE 6 — OR: 10 | 5 = 15 */
+//     result = Alu((int8_t)10, (int8_t)5, 6, (int8_t)0);
+//     printf("Case 6 OR  (10 | 5):     output = %d  (expected 15)\n", result);
+//     printFlags();
 
-    /* CASE 7 — JR: (2 << 6) | 3 = 131 */
-    result = Alu((int8_t)2, (int8_t)3, 7, (int8_t)0);
-    printf("Case 7 JR  (2||3):       output = %d  (expected 131 in pc)\n", result);
-    printFlags();
+//     /* CASE 7 — JR: (2 << 6) | 3 = 131 */
+//     result = Alu((int8_t)2, (int8_t)3, 7, (int8_t)0);
+//     printf("Case 7 JR  (2||3):       output = %d  (expected 131 in pc)\n", result);
+//     printFlags();
 
-    /* CASE 8 — SAL: 3 << 2 = 12 */
-    result = Alu((int8_t)3, (int8_t)0, 8, (int8_t)2);
-    printf("Case 8 SAL (3<<2):       output = %d  (expected 12)\n", result);
-    printFlags();
+//     /* CASE 8 — SAL: 3 << 2 = 12 */
+//     result = Alu((int8_t)3, (int8_t)0, 8, (int8_t)2);
+//     printf("Case 8 SAL (3<<2):       output = %d  (expected 12)\n", result);
+//     printFlags();
 
-    /* CASE 9 — SAR: 12 >> 2 = 3 */
-    result = Alu((int8_t)12, (int8_t)0, 9, (int8_t)2);
-    printf("Case 9 SAR (12>>2):      output = %d  (expected 3)\n", result);
-    printFlags();
+//     /* CASE 9 — SAR: 12 >> 2 = 3 */
+//     result = Alu((int8_t)12, (int8_t)0, 9, (int8_t)2);
+//     printf("Case 9 SAR (12>>2):      output = %d  (expected 3)\n", result);
+//     printFlags();
 
-    /* CASE 10 — LB: load from mem[5] = 42 */
-    mem[5] = 42;
-    result = Alu((int8_t)0, (int8_t)0, 10, (int8_t)5);
-    printf("Case 10 LB (mem[5]=42):  output = %d  (expected 42)\n", result);
-    printFlags();
+//     /* CASE 10 — LB: load from mem[5] = 42 */
+//     mem[5] = 42;
+//     result = Alu((int8_t)0, (int8_t)0, 10, (int8_t)5);
+//     printf("Case 10 LB (mem[5]=42):  output = %d  (expected 42)\n", result);
+//     printFlags();
 
-    /* CASE 11 — SB: store 26 to mem[3], read back */
-    result = Alu((int8_t)26, (int8_t)0, 11, (int8_t)3);
-    printf("Case 11 SB (mem[3]=26):  output = %d  (expected 26)\n", result);
-    printFlags();
+//     /* CASE 11 — SB: store 26 to mem[3], read back */
+//     result = Alu((int8_t)26, (int8_t)0, 11, (int8_t)3);
+//     printf("Case 11 SB (mem[3]=26):  output = %d  (expected 26)\n", result);
+//     printFlags();
 
-    return;
-}
+//     return 0;
+// }

@@ -22,8 +22,6 @@ typedef struct {
     int valid;
 } PipelineStage;
 
-extern PipelineStage IF= {0};
-extern PipelineStage ID= {0};
-extern PipelineStage IE= {0};
+
 
 #endif
