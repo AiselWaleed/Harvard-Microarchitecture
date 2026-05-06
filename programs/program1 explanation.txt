@@ -1,0 +1,42 @@
+MOVI R1 10
+MOVI R2 20
+ADD R1 R2
+MOVI R3 5
+SUB R1 R3
+MUL R1 R2
+MOVI R4 3
+ANDI R4 6
+MOVI R5 15
+EOR R5 R4
+SLC R1 2
+SRC R1 3
+STR R1 50
+LDR R6 50
+MOVI R7 0
+BEQZ R7 2
+MOVI R8 99
+MOVI R9 1
+ADD R6 R9
+MOVI R10 0
+MOVI R11 0
+BR R10 R11
+ADD R1 R2
+
+
+
+Line 1-2: Load 10 into R1, 20 into R2.
+Line 3: R1 = R1 + R2 = 10 + 20 = 30. Updates C, V, N, S, Z flags.
+Line 4: Load 5 into R3.
+Line 5: R1 = R1 - R3 = 30 - 5 = 25. Updates V, N, S, Z.
+Line 6: R1 = R1 * R2 = 25 * 20 = 500. Lower 8 bits of 500 = 500 % 256 = 244, which is 0b11110100, interpreted as -12 in signed 8-bit. Updates N, Z.
+Line 7-8: Load 3 into R4, then ANDI R4 with immediate 6. 3 in binary = 00000011, 6 = 00000110. AND = 00000010 = 2. R4 = 2. Updates N, Z.
+Line 9-10: Load 15 into R5. EOR R5 with R4 = 15 XOR 2 = 0b00001111 XOR 0b00000010 = 0b00001101 = 13. R5 = 13. Updates N, Z.
+Line 11: SLC R1 by 2. R1 was 244 = 11110100. Circular left shift by 2: 11010011 = 211 (signed: -45). R1 = -45. Updates N, Z.
+Line 12: SRC R1 by 3. R1 = 11010011. Circular right shift by 3: take bottom 3 bits (011) and put them at the top → 01111010 = 122. R1 = 122. Updates N, Z.
+Line 13: STR R1 to data memory address 50. dataMem[50] = 122.
+Line 14: LDR R6 from address 50. R6 = 122.
+Line 15: MOVI R7 = 0.
+Line 16: BEQZ R7 2. R7 == 0, so branch is taken. PC = address of BEQZ + 1 + 2. BEQZ is at instruction address 15 (0-indexed), so PC = 15 + 1 + 2 = 18. The two instructions after it (lines 17 and 18, MOVI R8 99 and MOVI R9 1) get flushed.
+Line 19 (address 18): ADD R6 R9. R9 was never set (got flushed), so R9 = 0. R6 = 122 + 0 = 122. This is where execution resumes after the branch.
+Lines 20-21: MOVI R10 = 0, MOVI R11 = 0.
+Line 22: BR R10 R11. PC = R10 || R11 = 00000000 || 00000000 = address 0. Unconditional jump back to the start of the program. The instruction after it (line 23, ADD R1 R2) gets flushed. Then execution restarts from address 0, creating an infinite loop — so for testing purposes you'd want to break this somehow (maybe change BR target to point somewhere that ends naturally, or just trace a fixed number of cycles).
