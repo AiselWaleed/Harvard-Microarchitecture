@@ -1,6 +1,12 @@
 
-uint16_t instruction_memory[1024];
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include "../include/memory.h"
+
+short int instruction_memory[1024];
 int counti=0;
+int current_instruction=0;
 int countd=0;
 uint8_t data_memory[2048];
 int8_t gpr[64]={0};
@@ -9,23 +15,34 @@ uint16_t pc;
 
 void init_memory(){
     for(int i=0;i<1024;i++){
-        instruction_memory[i]=0;
+        instruction_memory[i]=0xFFFF;
     }
     for(int i=0;i<2048;i++){
-        data_memory[i]=0;
+        data_memory[i]=0xFFFF;
     }
 }
 
-void write_instruction(uint16_t instruction){
+void write_instruction(short int instruction){
     instruction_memory[counti]=instruction;
     counti++;
 }
 
-uint16_t fetch_instruction(){
+uint16_t get_pc(){
+    return pc;
+}
+
+short int fetch_instruction(){
+    if (pc >= 1023)
+        return;
+    if (instruction_memory[pc] == 0xFFFF){
+        printf("fetch_inst: No more instructions to fetch");
+        return -1;
+        //is that okay?
+    }
     return instruction_memory[pc++];
 }
 
-uint8_t load_data(int index){
+int8_t load_data(int index){
     return data_memory[index];
 }
 

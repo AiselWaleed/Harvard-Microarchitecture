@@ -15,9 +15,6 @@ PipelineStage IF= {0};
 PipelineStage ID= {0};
 PipelineStage IE= {0};
 
-//TEMP: to be implemented in memory
-uint16_t instruction_memory [INST_MEM_SIZE];
-
 void init_pipeline(){
     clock =0;
     global_pc = 0;
@@ -26,11 +23,11 @@ void init_pipeline(){
     end_of_instructions = 0;
     printf("init_pipeline: Pipelining initiated \n");
     //TEMP: sample parsed insts, later to be taken from memory
-    instruction_memory [0] = (0b1111000011110000);
-    instruction_memory [1] = (0b1101010011110000);    
-    instruction_memory [2] = (0b1111001100110000);
-    instruction_memory [3] = (0b1100111011110000);
-    instruction_memory [4] = (0b1000110011110000);
+    // instruction_memory [0] = (0b1111000011110000);
+    // instruction_memory [1] = (0b1101010011110000);    
+    // instruction_memory [2] = (0b1111001100110000);
+    // instruction_memory [3] = (0b1100111011110000);
+    // instruction_memory [4] = (0b1000110011110000);
     printf("init_pipeline: Instructions in place \n");
 }
 
@@ -38,7 +35,7 @@ void increment_pc(){
     global_pc++;
 }
 
-int get_no_of_inst(uint16_t inst_mem[]){
+int get_no_of_inst(short int inst_mem[]){
     int size = 0;
     int i=0;
     while (i<INST_MEM_SIZE){
@@ -54,26 +51,20 @@ int get_no_of_inst(uint16_t inst_mem[]){
 void fetch_inst(){
     printf("fetch_inst: Current pc = %d \n", global_pc);
 
-    if (global_pc >= 1023)
-        return;
+    short int fetched_instruction = fetch_instruction();
+        if (fetched_instruction == -1){
+            printf("fetch_inst: No more instructions to fetch");
+            IF.valid =0;
+            end_of_instructions = 1;
+        }
 
-    //Changed later to FFFF or a similarly invalid value.
-    if (instruction_memory[global_pc] == 0 || current_instruction==no_of_instructions){
-        printf("fetch_inst: No more instructions to fetch");
-        IF.valid =0;
-        end_of_instructions = 1;
-        return;
-    }
-
-    printf("fetch_inst: this is safely inside the fetch_inst method \n");
-
-    uint16_t fetched_instruction = instruction_memory[global_pc];
+        else{
+        IF.instruction = fetched_instruction;
+        IF.pc = get_pc()-1;
+        IF.valid = 1;
+        IF.inst_id = ++current_instruction;
+        }
     //data check?
-    IF.pc = global_pc;
-    IF.instruction = fetched_instruction;
-    IF.valid = 1;
-    IF.inst_id = ++current_instruction;
-    increment_pc();
 }
 
 void decode(){
@@ -96,11 +87,11 @@ void decode(){
 void execute(){
     if (!IE.valid)
         return;
-
+    IE.result = Alu_int(IE.opcode, IE.val1, IE.val2, IE.imm);
     //TEMP
-    IE.val1=66;
-    IE.val2=88;
-    IE.result = 44;
+    // IE.val1=66;
+    // IE.val2=88;
+    // IE.result = 44;
     IE.valid=0;
     printf("this is the execute method, executing instruction %d \n", IE.inst_id);
     printf("execute: val1 = %d\n", IE.val1);
