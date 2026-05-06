@@ -5,7 +5,7 @@
 #include <string.h>
 #include <stdint.h>
 
-static uint16_t parsedInstruction = 0;
+static short int parsedInstruction = 0;
 static int R1 = 0;
 static int R2 = 0;
 static int imm = 0;
@@ -146,16 +146,30 @@ void parseInstruction(const char *instruction)
     parsedInstruction |= (R2 & 0x3F);
 
     // write to instruction memory
-    writeInstruction(parsedInstruction);
+    write_instruction(parsedInstruction);
+}
+
+static const char *resolveProgramPath(const char *filename, char *buffer, size_t bufferSize)
+{
+    if (strchr(filename, '/') != NULL || strchr(filename, '\\') != NULL)
+    {
+        return filename;
+    }
+
+    snprintf(buffer, bufferSize, "programs/%s", filename);
+    return buffer;
 }
 
 // read program from file and parse each instruction
 void loadProgram(const char *filename)
 {
-    FILE *file = fopen(filename, "r");
+    char programPath[512];
+    const char *path = resolveProgramPath(filename, programPath, sizeof(programPath));
+
+    FILE *file = fopen(path, "r");
     if (!file)
     {
-        fprintf(stderr, "Error: Could not open file '%s'\n", filename);
+        fprintf(stderr, "Error: Could not open file '%s'\n", path);
         exit(EXIT_FAILURE);
     }
 
