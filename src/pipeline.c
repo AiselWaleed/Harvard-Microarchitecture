@@ -2,7 +2,10 @@
 #include <stdio.h>
 #define INST_MEM_SIZE 1024
 #include "../include/memory.h"
+#include "../include/memory.h"
 #include "../include/pipeline.h"
+#include "memory.c"
+#include "alu.c"
 
 
 int clock;
@@ -35,18 +38,18 @@ void increment_pc(){
     global_pc++;
 }
 
-int get_no_of_inst(short int inst_mem[]){
-    int size = 0;
-    int i=0;
-    while (i<INST_MEM_SIZE){
-        if (inst_mem[i]!=0)
-            size++;
-        i++;
-    }
+// int get_no_of_inst(short int inst_mem[]){
+//     int size = 0;
+//     int i=0;
+//     while (i<INST_MEM_SIZE){
+//         if (inst_mem[i]!=0)
+//             size++;
+//         i++;
+//     }
 
-    printf("get_no_of_inst: size of array = %d \n", size);
-    return size;
-}
+//     printf("get_no_of_inst: size of array = %d \n", size);
+//     return size;
+// }
 
 void fetch_inst(){
     printf("fetch_inst: Current pc = %d \n", global_pc);
@@ -87,7 +90,7 @@ void decode(){
 void execute(){
     if (!IE.valid)
         return;
-    IE.result = Alu_int(IE.opcode, IE.val1, IE.val2, IE.imm);
+    IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
     //TEMP
     // IE.val1=66;
     // IE.val2=88;
@@ -100,7 +103,7 @@ void execute(){
 }
 
 void run_program(){
-    no_of_instructions = get_no_of_inst(instruction_memory);
+    no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
 

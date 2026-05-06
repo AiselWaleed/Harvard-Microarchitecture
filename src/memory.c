@@ -18,7 +18,7 @@ void init_memory(){
         instruction_memory[i]=0xFFFF;
     }
     for(int i=0;i<2048;i++){
-        data_memory[i]=0xFFFF;
+        data_memory[i]=0xFF;
     }
 }
 
@@ -31,6 +31,9 @@ uint16_t get_pc(){
     return pc;
 }
 
+int get_no_of_instructions(){
+    return counti;
+}
 short int fetch_instruction(){
     if (pc >= 1023)
         return;
@@ -42,11 +45,11 @@ short int fetch_instruction(){
     return instruction_memory[pc++];
 }
 
-int8_t load_data(int index){
+int8_t load_data(int8_t index){
     return data_memory[index];
 }
 
-void store_data(uint8_t data){
+void store_data(int8_t data){
     data_memory[countd++]=data;
 }
 
