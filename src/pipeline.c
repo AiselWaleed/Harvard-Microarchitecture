@@ -2,15 +2,11 @@
 #include <stdio.h>
 #define INST_MEM_SIZE 1024
 #include "../include/memory.h"
-#include "../include/memory.h"
 #include "../include/pipeline.h"
-#include "memory.c"
-#include "alu.c"
-
-
+#include "../include/alu.h"
+#include "../include/parser.h"
 int clock;
 int global_pc;
-int current_instruction;
 int no_of_instructions;
 int end_of_instructions;
 
@@ -55,7 +51,7 @@ void fetch_inst(){
     printf("fetch_inst: Current pc = %d \n", global_pc);
 
     short int fetched_instruction = fetch_instruction();
-        if (fetched_instruction == -1){
+        if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
             printf("fetch_inst: No more instructions to fetch");
             IF.valid =0;
             end_of_instructions = 1;
@@ -103,6 +99,7 @@ void execute(){
 }
 
 void run_program(){
+    loadProgram("program1.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;

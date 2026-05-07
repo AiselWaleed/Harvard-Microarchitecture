@@ -1,13 +1,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>
-#include <stdio.h>
 #define INST_MEM_SIZE 1024
 #include "../include/memory.h"
-
 #include "../include/pipeline.h"
-#include "memory.c"
-
+#include "../include/alu.h"
 int zeroFlag;
 int carryFlag;
 int overflowFlag;

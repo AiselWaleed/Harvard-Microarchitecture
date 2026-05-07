@@ -36,7 +36,7 @@ int get_no_of_instructions(){
 }
 short int fetch_instruction(){
     if (pc >= 1023)
-        return;
+        return -1;
     if (instruction_memory[pc] == 0xFFFF){
         printf("fetch_inst: No more instructions to fetch");
         return -1;

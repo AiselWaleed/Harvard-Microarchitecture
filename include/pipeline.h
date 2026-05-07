@@ -1,4 +1,5 @@
-#ifndef pipeline.h
+#ifndef PIPELINE_H
+#define PIPELINE_H
 #define INST_MEM_SIZE 1024
 #include <stdint.h>
 #include <stdio.h>
@@ -22,6 +23,8 @@ typedef struct {
     int valid;
 } PipelineStage;
 
-
+// Function declarations
+int is_data_hazard(void);
+void run_program(void);
 
 #endif
