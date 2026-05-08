@@ -6,7 +6,6 @@
 #include "../include/alu.h"
 #include "../include/parser.h"
 int clock;
-int global_pc;
 int no_of_instructions;
 int end_of_instructions;
 
@@ -16,7 +15,6 @@ PipelineStage IE= {0};
 
 void init_pipeline(){
     clock =0;
-    global_pc = 0;
     no_of_instructions = 0;
     current_instruction = 0;
     end_of_instructions = 0;
@@ -28,10 +26,6 @@ void init_pipeline(){
     // instruction_memory [3] = (0b1100111011110000);
     // instruction_memory [4] = (0b1000110011110000);
     printf("init_pipeline: Instructions in place \n");
-}
-
-void increment_pc(){
-    global_pc++;
 }
 
 // int get_no_of_inst(short int inst_mem[]){
@@ -48,7 +42,7 @@ void increment_pc(){
 // }
 
 void fetch_inst(){
-    printf("fetch_inst: Current pc = %d \n", global_pc);
+    printf("fetch_inst: Current pc = %d \n", get_pc());
 
     short int fetched_instruction = fetch_instruction();
         if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
@@ -91,6 +85,10 @@ void execute(){
     // IE.val1=66;
     // IE.val2=88;
     // IE.result = 44;
+    // Write-back for instructions that update registers
+    if (IE.opcode != 4 && IE.opcode != 7 && IE.opcode != 11) {
+        write_reg(IE.r1, IE.result);
+    }
     IE.valid=0;
     printf("this is the execute method, executing instruction %d \n", IE.inst_id);
     printf("execute: val1 = %d\n", IE.val1);
@@ -105,30 +103,43 @@ void run_program(){
         return;
 
     while (!(end_of_instructions && !IE.valid && !ID.valid && !IF.valid )) {
-        printf("run_program: Cycle2 %d \n", clock);
-
-        if(IE.valid){
-            execute ();
-            //IE is then invalidated
-            printf("run_program: instruction %d executed \n", IE.inst_id);
-        }
-        if(ID.valid){
-            decode ();
-            printf("run_program: instruction %d decoded \n", ID.inst_id);
-        }
-        //
-        // if (!IF.valid && !end_of_instructions){
-        //     fetch_inst();
-        //     if (IF.valid){
-        //         printf("run_program: instruction %d is fetched \n", IF.inst_id);
-        //     }
-        // } 
-        //
+        printf("run_program: Cycle %d \n", clock);
 
         if (!IE.valid && ID.valid){
             int hazard = is_data_hazard();
             if (!hazard){
+            // transfer stage data and populate operands from registers or immediates
             IE = ID;
+
+            // sign-extend 6-bit immediate to int8_t
+            int raw_imm = IE.imm & 0x3F;
+            int8_t signed_imm = (raw_imm & 0x20) ? (int8_t)(raw_imm | ~0x3F) : (int8_t)raw_imm;
+
+            // For opcodes that use immediates, set val/imm accordingly
+            switch (IE.opcode) {
+                case 3: // MOVI: immediate moved to destination
+                    IE.imm = signed_imm;
+                    IE.val1 = signed_imm;
+                    IE.val2 = 0;
+                    break;
+                case 4: // BEQZ: compare R1 with zero, imm is branch offset
+                case 5: // ANDI: R1 & imm
+                case 8: // SLC: shift left by imm
+                case 9: // SRC: shift right by imm
+                case 10: // LDR: load from memory using imm
+                case 11: // STR: store to memory using imm
+                    IE.imm = signed_imm;
+                    IE.val1 = read_reg(IE.r1);
+                    IE.val2 = signed_imm;
+                    break;
+                default:
+                    // Register-register operations
+                    IE.imm = signed_imm;
+                    IE.val1 = read_reg(IE.r1);
+                    IE.val2 = read_reg(IE.r2);
+                    break;
+            }
+
             IE.valid = 1;
             ID.valid = 0;
             printf("instruction %d is passed to execute phase \n", IE.inst_id);
@@ -145,12 +156,24 @@ void run_program(){
             IF.valid = 0;
             printf("instruction %d is passed to decode phase \n", ID.inst_id);
         }
+
+        if(IE.valid){
+            execute ();
+            //IE is then invalidated
+            printf("run_program: instruction %d executed \n", IE.inst_id);
+        }
+
+        if(ID.valid){
+            decode ();
+            printf("run_program: instruction %d decoded \n", ID.inst_id);
+        }
+
         if (!IF.valid && !end_of_instructions){
             fetch_inst();
             if (IF.valid){
                 printf("run_program: instruction %d is fetched \n", IF.inst_id);
             }
-        }
+        } 
         
         fflush(stdout); // ensures text appears before sleeping
         SLEEP_SECOND(); 
