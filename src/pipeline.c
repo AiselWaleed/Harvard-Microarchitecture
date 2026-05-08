@@ -46,7 +46,7 @@ void fetch_inst(){
 
     short int fetched_instruction = fetch_instruction();
         if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
-            printf("fetch_inst: No more instructions to fetch");
+            printf("fetch_inst: No more instructions to fetch\n");
             IF.valid =0;
             end_of_instructions = 1;
         }
@@ -86,10 +86,10 @@ void execute(){
     // IE.val2=88;
     // IE.result = 44;
     // Write-back for instructions that update registers
-    if (IE.opcode != 4 && IE.opcode != 7 && IE.opcode != 11) {
-        write_reg(IE.r1, IE.result);
-    }
-    IE.valid=0;
+    // if (IE.opcode != 4 && IE.opcode != 7 && IE.opcode != 11) {
+    //     write_reg(IE.r1, IE.result);
+    // }
+    //IE.valid=0;
     printf("this is the execute method, executing instruction %d \n", IE.inst_id);
     printf("execute: val1 = %d\n", IE.val1);
     printf("execute: val2 = %d \n", IE.val2);
@@ -97,16 +97,50 @@ void execute(){
 }
 
 void run_program(){
-    loadProgram("program1.txt");
+    loadProgram("Program3.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
 
     while (!(end_of_instructions && !IE.valid && !ID.valid && !IF.valid )) {
-        printf("run_program: Cycle %d \n", clock);
+       
+        printf("......run_program: Cycle %d ...... \n", clock);
 
-        if (!IE.valid && ID.valid){
-            int hazard = is_data_hazard();
+
+        if(IE.valid){
+            execute ();
+            //IE is then invalidated
+            printf("run_program: instruction %d executed \n", IE.inst_id);
+
+            if ((IE.opcode == 4 && IE.val1 == 0) || (IE.opcode == 7)) {
+                printf("CONTROL HAZARD: Branch Taken! Flushing IF and ID buffers.\n");
+                
+                // 1. Destroy the wrong instructions
+                IF.valid = 0;
+                ID.valid = 0;
+                
+                // 2. Force the Memory's PC to the new branch target
+                // IE.result holds the new PC calculated by the ALU
+                pc= IE.result; // get current PC
+        }
+    }
+
+        if(ID.valid){
+            decode ();
+            printf("run_program: instruction %d decoded \n", ID.inst_id);
+        }
+
+        if (!IF.valid && !end_of_instructions){
+            fetch_inst();
+            if (IF.valid){
+                printf("run_program: instruction %d is fetched \n", IF.inst_id);
+            }
+        }
+        int hazard=is_data_hazard();
+ 
+
+        if (ID.valid){
+           // int hazard = is_data_hazard();
             if (!hazard){
             // transfer stage data and populate operands from registers or immediates
             IE = ID;
@@ -150,6 +184,10 @@ void run_program(){
             }
            
         }
+        else{
+            IE.valid = 0; //if no instruction in ID, ensure IE is invalid
+        }
+
         if (!ID.valid && IF.valid){
             ID = IF;
             ID.valid = 1;
@@ -157,23 +195,7 @@ void run_program(){
             printf("instruction %d is passed to decode phase \n", ID.inst_id);
         }
 
-        if(IE.valid){
-            execute ();
-            //IE is then invalidated
-            printf("run_program: instruction %d executed \n", IE.inst_id);
-        }
-
-        if(ID.valid){
-            decode ();
-            printf("run_program: instruction %d decoded \n", ID.inst_id);
-        }
-
-        if (!IF.valid && !end_of_instructions){
-            fetch_inst();
-            if (IF.valid){
-                printf("run_program: instruction %d is fetched \n", IF.inst_id);
-            }
-        } 
+        
         
         fflush(stdout); // ensures text appears before sleeping
         SLEEP_SECOND(); 
@@ -214,7 +236,6 @@ int is_data_hazard(){
     return 0;
     
 }
-
 int main (){
     init_pipeline();
     run_program();
