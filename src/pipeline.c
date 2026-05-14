@@ -116,27 +116,26 @@ void run_program(){
             decode ();
             printf("run_program: instruction %d decoded \n", ID.inst_id);
         }
-        //
-        // if (!IF.valid && !end_of_instructions){
-        //     fetch_inst();
-        //     if (IF.valid){
-        //         printf("run_program: instruction %d is fetched \n", IF.inst_id);
-        //     }
-        // } 
-        //
+        if (!IF.valid && !end_of_instructions){
+            fetch_inst();
+            if (IF.valid){
+                printf("run_program: instruction %d is fetched \n", IF.inst_id);
+            }
+        }
+
 
         if (!IE.valid && ID.valid){
-            int hazard = is_data_hazard();
-            if (!hazard){
+            // int hazard = is_data_hazard();
+            // if (!hazard){
             IE = ID;
             IE.valid = 1;
             ID.valid = 0;
             printf("instruction %d is passed to execute phase \n", IE.inst_id);
-            }
-            else{ //HAZARD!
-                printf("run_program: Stalling pipeline due to hazard in instruction %d \n", ID.inst_id);
-                IE.valid = 0; //stall IE
-            }
+            // }
+            // else{ //HAZARD!
+            //     printf("run_program: Stalling pipeline due to hazard in instruction %d \n", ID.inst_id);
+            //     IE.valid = 0; //stall IE
+            // }
            
         }
         if (!ID.valid && IF.valid){
@@ -145,12 +144,7 @@ void run_program(){
             IF.valid = 0;
             printf("instruction %d is passed to decode phase \n", ID.inst_id);
         }
-        if (!IF.valid && !end_of_instructions){
-            fetch_inst();
-            if (IF.valid){
-                printf("run_program: instruction %d is fetched \n", IF.inst_id);
-            }
-        }
+        
         
         fflush(stdout); // ensures text appears before sleeping
         SLEEP_SECOND(); 
