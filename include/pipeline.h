@@ -1,4 +1,5 @@
-#ifndef pipeline.h
+#ifndef PIPELINE_H
+#define PIPELINE_H
 #define INST_MEM_SIZE 1024
 #include <stdint.h>
 #include <stdio.h>
@@ -12,18 +13,18 @@
 
 typedef struct {
     int inst_id;
-    uint16_t instruction;
+    short int instruction;
     int opcode;
     int r1, r2;
     int8_t imm;
-    int val1, val2; //in case needed later in ALU
-    int result;
-    int pc;
+    int8_t val1, val2; //in case needed later in ALU
+    int8_t result;
+    int8_t pc;
     int valid;
 } PipelineStage;
 
-extern PipelineStage IF= {0};
-extern PipelineStage ID= {0};
-extern PipelineStage IE= {0};
+// Function declarations
+int is_data_hazard(void);
+void run_program(void);
 
 #endif
