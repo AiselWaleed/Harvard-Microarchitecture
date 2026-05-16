@@ -30,6 +30,18 @@ void init_pipeline(){
     printf("init_pipeline: Instructions in place \n");
 }
 
+void print_binary16(uint16_t num) {
+    // Loop from the most significant bit (bit 15) down to the least (bit 0)
+    for (int i = 15; i >= 0; i--) {
+        // Shift 1 to the i-th position and check if that bit is set
+        int bit = (num >> i) & 1;
+        printf("%d", bit);
+        
+        // Optional: Add a space every 4 bits for readability
+        if (i % 4 == 0) printf(" ");
+    }
+    printf("\n");
+}
 // int get_no_of_inst(short int inst_mem[]){
 //     int size = 0;
 //     int i=0;
@@ -57,6 +69,7 @@ void fetch_inst(){
             IF.pc = get_pc()-1;
             IF.valid = 1;
             IF.inst_id = ++current_instruction;
+            print_binary16((short int)fetched_instruction);
         }
     //data check?
 }
@@ -88,7 +101,8 @@ void decode(){
         case 9:
             ID.r1 = (ID.instruction >> 6) & 0b111111;
             ID.val1 = read_reg(ID.r1);
-            int8_t raw_imm = IE.imm & 0x3F;
+            // int8_t raw_imm = ID.imm & 0x3F;
+            int8_t raw_imm = (ID.instruction) & (0b111111);
             ID.imm = (raw_imm & 0x20) ? (int8_t)(raw_imm | ~0x3F) : (int8_t)raw_imm;          
             printf("decode: r1 = Register %d = %d \n", ID.r1, (int) ID.val1);
             printf("decode: immediate = %d", ID.imm);
@@ -110,26 +124,49 @@ void decode(){
     // ID.r1 = ID.instruction & (0b111111 << 6);
     // ID.r2 = ID.instruction & (0b111111);
     // ID.imm = ID.instruction & (0b111111);
-    printf("this is the decode method, decoding instruction %d \n", ID.inst_id);
-    printf("decode: opcode = %d\n", ID.opcode);
-    printf("decode: r1 = Register %d \n", ID.r1);
-    printf("decode: r2 = Register %d \n", ID.r2);
+    printf("decode : Instruction %d decoded\n", ID.inst_id);
 }
 
 
 void execute(){
     if (!IE.valid)
         return;
+    printf("this is the execute method, executing instruction %d \n", IE.inst_id);
+    switch(IE.opcode){
+        case 3:
+            write_reg(IE.r1, IE.imm);
+            printf("execute: value %d moved immediately into Register %d\n",read_reg(IE.r1), IE.r1);
+        break;
+        case 10:
+            int8_t load_value = load_data(IE.imm);
+            write_reg(IE.r1, load_value);
+            printf("execute: value %d loaded into Register %d\n", read_reg(IE.r1), IE.r1);
+        break;
+        case 11:
+            int8_t store_value = IE.val1;
+            store_data(store_value, IE.imm);
+            printf("execute: value %d from Register %d stored in memory\n", read_reg(IE.r1), IE.r1);
+        break;
+        case 4:
+            set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+            printf("execute: BEQZ executed\n");
+        break;
+        case 7:
+            set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+            printf("execute: BR executed\n");
+        break;
+        default:
+            write_reg(IE.r1,Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+            printf("execute: value inside Register %d updated\n",IE.r1);
+        break;
+    }
     IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
     //TEMP
     // IE.val1=66;
     // IE.val2=88;
     // IE.result = 44;
     IE.valid=0;//commented in deb pipeline
-    printf("this is the execute method, executing instruction %d \n", IE.inst_id);
-    printf("execute: val1 = %d\n", IE.val1);
-    printf("execute: val2 = %d \n", IE.val2);
-    printf("execute: result = %d \n", IE.result);
+    printf("execute: Instruction %d Executed\n", IE.inst_id);
 }
 
 void run_program(){

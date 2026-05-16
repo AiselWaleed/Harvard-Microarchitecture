@@ -49,12 +49,14 @@ short int fetch_instruction(){
     return instruction_memory[pc++];
 }
 
-int8_t load_data(int8_t index){
+int8_t load_data(uint16_t index){
     return data_memory[index];
 }
-
-void store_data(int8_t data){
-    data_memory[countd++]=data;
+//void store_data (int8_t data){
+//    data_memory[countd++]=data;
+//}
+void store_data(int8_t data, uint16_t index){
+    data_memory[index]=data;
 }
 
 int8_t read_reg(int index){
