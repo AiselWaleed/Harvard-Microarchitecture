@@ -19,7 +19,7 @@ typedef struct {
     int8_t imm;
     int8_t val1, val2; //in case needed later in ALU
     int8_t result;
-    int8_t pc;
+    uint16_t pc;
     int valid;
 } PipelineStage;
 

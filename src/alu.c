@@ -140,8 +140,7 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
             negativeFlag = updateNegative(negativeFlag, outputD);
             signFlag     = updateSign(signFlag, negativeFlag, overflowFlag);
             zeroFlag     = updateZero(zeroFlag, outputD);
-
-    break;
+        break;
 
        case 1:
             outputD = operandA - operandB;
@@ -166,33 +165,34 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
             break;
 
         case 4:
+        //EDIT PC
             if(operandA==0){
-                pc= pc+1+ imm;
+                // pc= pc+1+ imm;
+                outputD=(int8_t)(get_pc()+imm);
             }
             else{
-                pc= pc+1;
+                // pc= pc+1;
+                outputD=(int8_t)(get_pc());
             }
-            outputD=pc;
+            // outputD=pc;
             break;
 
         case 5:
-            outputD=operandA&operandB;
-           
-
+            outputD=operandA&imm;
             negativeFlag= updateNegative(negativeFlag,outputD);
             zeroFlag= updateZero(zeroFlag,outputD);
             break;
          
          case 6:
-            outputD= operandA|operandB;
+            outputD= operandA^operandB;
 
             negativeFlag= updateNegative(negativeFlag,outputD);
             zeroFlag= updateZero(zeroFlag,outputD);
             break;
             
         case 7:
-            pc= (operandA<<6)|operandB;
-            outputD=pc;
+            // pc= (operandA<<6)|operandB;
+            outputD=(operandA<<6)|operandB;
             break;
 
         case 8:
@@ -215,8 +215,8 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
             break;
 
         case 11:
-            store_data(operandA);
-            outputD=load_data(imm);
+            store_data(operandA, (uint16_t)imm);
+            outputD = load_data((uint16_t)imm);
             break;
      }
 

@@ -27,8 +27,11 @@ void write_instruction(short int instruction){
     counti++;
 }
 
-uint16_t get_pc(){
+uint16_t get_pc(void){
     return pc;
+}
+void set_pc(uint16_t new_pc){
+    pc = new_pc;
 }
 
 int get_no_of_instructions(){
@@ -42,15 +45,18 @@ short int fetch_instruction(){
         return -1;
         //is that okay?
     }
+    //UNIFY PC INCREMENT
     return instruction_memory[pc++];
 }
 
-int8_t load_data(int8_t index){
+int8_t load_data(uint16_t index){
     return data_memory[index];
 }
-
-void store_data(int8_t data){
-    data_memory[countd++]=data;
+//void store_data (int8_t data){
+//    data_memory[countd++]=data;
+//}
+void store_data(int8_t data, uint16_t index){
+    data_memory[index]=data;
 }
 
 int8_t read_reg(int index){
