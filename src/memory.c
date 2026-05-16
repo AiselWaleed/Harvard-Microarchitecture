@@ -27,8 +27,11 @@ void write_instruction(short int instruction){
     counti++;
 }
 
-uint16_t get_pc(){
+uint16_t get_pc(void){
     return pc;
+}
+void set_pc(uint16_t new_pc){
+    pc = new_pc;
 }
 
 int get_no_of_instructions(){
@@ -42,6 +45,7 @@ short int fetch_instruction(){
         return -1;
         //is that okay?
     }
+    //UNIFY PC INCREMENT
     return instruction_memory[pc++];
 }
 

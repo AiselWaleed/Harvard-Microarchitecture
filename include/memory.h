@@ -7,6 +7,7 @@
 void init_memory(void);
 void write_instruction(short int instruction);
 uint16_t get_pc(void);
+void set_pc(uint16_t new_pc);
 int get_no_of_instructions(void);
 short int fetch_instruction(void);
 int8_t load_data(int8_t index);

@@ -166,6 +166,7 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
             break;
 
         case 4:
+        //EDIT PC
             if(operandA==0){
                 pc= pc+1+ imm;
             }
@@ -191,6 +192,8 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
             break;
             
         case 7:
+                //EDIT PC
+
             pc= (operandA<<6)|operandB;
             outputD=pc;
             break;
