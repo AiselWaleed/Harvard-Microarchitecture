@@ -17,6 +17,7 @@ int8_t load_data(uint16_t index);
 void store_data(int8_t data, uint16_t index);
 int8_t read_reg(int index);
 void write_reg(int index, int8_t data);
+void print_nonzero_gprs(void);
 
 // Global variables
 extern short int instruction_memory[1024];
