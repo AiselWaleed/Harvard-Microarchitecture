@@ -66,3 +66,18 @@ int8_t read_reg(int index){
 void write_reg(int index, int8_t data){
     gpr[index]=data;
 }
+
+void print_nonzero_gprs(void){
+    int printed = 0;
+
+    for (int i = 0; i < 64; i++) {
+        if (gpr[i] != 0) {
+            printf("R%d = %d\n", i, gpr[i]);
+            printed = 1;
+        }
+    }
+
+    if (!printed) {
+        printf("All GPRs are zero.\n");
+    }
+}

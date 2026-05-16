@@ -196,6 +196,7 @@ void run_program(){
                     uint16_t new_pc = (0x00FF) & IE.result;
                     set_pc(new_pc);
             }
+            print_nonzero_gprs();
 
         }
 
