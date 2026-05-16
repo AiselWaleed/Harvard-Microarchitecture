@@ -100,6 +100,7 @@ void decode(){
             printf("decode: r1 = Register %d = %d \n", ID.r1, (int) ID.val1);
             printf("decode: address = %d\n", ID.imm);
         break;
+    }
     // }
     // ID.r1 = (ID.instruction >> 6) & 0b111111;
     // ID.r2 = (ID.instruction) & (0b111111);
@@ -144,7 +145,6 @@ void run_program(){
             execute ();
             //IE is then invalidated
             printf("run_program: instruction %d executed \n", IE.inst_id);
-            uint16_t new_pc = (0x00FF) & IE.result;
             if ((IE.opcode == 4 && IE.val1 == 0) || (IE.opcode == 7)) {
                 
                     printf("CONTROL HAZARD: Branch Taken! Flushing IF and ID buffers.\n");
@@ -156,6 +156,7 @@ void run_program(){
                     // 2. Force the Memory's PC to the new branch target
                     // IE.result holds the new PC calculated by the ALU
                     // pc= IE.result; // get current PC
+                    uint16_t new_pc = (0x00FF) & IE.result;
                     set_pc(new_pc);
             }
 
