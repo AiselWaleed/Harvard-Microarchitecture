@@ -152,19 +152,19 @@ void execute(){
         break;}
         case 4:{
             if (IE.val1 == 0){
-                uint16_t target= (uint16_t)(IE.pc +1+ IE.imm); 
-                set_pc(target);
+                // uint16_t target= (uint16_t)(IE.pc +1+ IE.imm); 
+                // set_pc(target);
                 IE.branch_taken = 1; // Set branch taken flag
-                //set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+                set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
                 printf("execute: BEQZ executed\n");
             }
         break;
         }
         case 7:{
-             uint16_t target = (uint16_t)((IE.val1 << 8) | (IE.val2 & 0xFF));
-            set_pc(target);
+            //  uint16_t target = (uint16_t)((IE.val1 << 8) | (IE.val2 & 0xFF));
+            // set_pc(target);
             IE.branch_taken = 1;
-            //set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+            set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
             printf("execute: BR executed\n");
         break;
         }

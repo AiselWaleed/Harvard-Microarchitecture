@@ -23,7 +23,9 @@ typedef struct {
     int valid;
     int branch_taken; // Flag to indicate if a branch was taken
 } PipelineStage;
-
+extern PipelineStage IF;
+extern PipelineStage ID;
+extern PipelineStage IE;
 // Function declarations
 int is_data_hazard(void);
 void run_program(void);
