@@ -90,10 +90,7 @@ void parseInstruction(const char *instruction)
     {
         extractOperands(instruction, &R1, &R2, 1);
         if (R2 < 0)
-        {
-            fprintf(stderr, "Error: Shift value for SLC cannot be negative\n");
-            exit(EXIT_FAILURE);
-        }
+            printf("Warning: Shift value for SLC cannot be negative\n");
         parsedInstruction |= (0b1000 << 12);
     }
     // SRC - opcode 9
@@ -101,10 +98,7 @@ void parseInstruction(const char *instruction)
     {
         extractOperands(instruction, &R1, &R2, 1);
         if (R2 < 0)
-        {
-            fprintf(stderr, "Error: Shift value for SRC cannot be negative\n");
-            exit(EXIT_FAILURE);
-        }
+            printf("Warning: Shift value for SRC cannot be negative\n");
         parsedInstruction |= (0b1001 << 12);
     }
     // LDR - opcode 10
@@ -120,27 +114,15 @@ void parseInstruction(const char *instruction)
         parsedInstruction |= (0b1011 << 12);
     }
     else
-    {
-        fprintf(stderr, "Error: Unrecognized instruction '%s'\n", instruction);
-        exit(EXIT_FAILURE);
-    }
+        printf("Error: Unrecognized instruction '%s' will not be parsed \n", instruction);
 
     // error handling for value bounds
     if (R1 < 0 || R1 > 63)
-    {
-        fprintf(stderr, "Error: Register R%d out of bounds (must be between 0 and 63)\n", R1);
-        exit(EXIT_FAILURE);
-    }
+        printf("Warning: Register R%d out of bounds (must be between 0 and 63)\n", R1);
     if (imm == 0 && (R2 < 0 || R2 > 63))
-    {
-        fprintf(stderr, "Error: Register R%d out of bounds (must be between 0 and 63)\n", R2);
-        exit(EXIT_FAILURE);
-    }
+        printf("Warning: Register R%d out of bounds (must be between 0 and 63)\n", R2);
     if (imm == 1 && (R2 > 31 || R2 < -32))
-    {
-        fprintf(stderr, "Error: Immediate value %d out of bounds (must be between -32 and 31)\n", R2);
-        exit(EXIT_FAILURE);
-    }
+        printf("Warning: Immediate value %d out of bounds (must be between -32 and 31)\n", R2);
 
     parsedInstruction |= (R1 & 0x3F) << 6;
     parsedInstruction |= (R2 & 0x3F);
