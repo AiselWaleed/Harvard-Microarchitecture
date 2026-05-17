@@ -168,7 +168,7 @@ int8_t Alu (int8_t operandA,int8_t operandB,int opcode,int8_t imm){
         //EDIT PC
             if(operandA==0){
                 // pc= pc+1+ imm;
-                outputD=(int8_t)(get_pc()+imm);
+                outputD=(int8_t)(IE.pc+1+imm);
             }
             else{
                 // pc= pc+1;
