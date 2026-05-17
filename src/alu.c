@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdint.h>
-#include <stdio.h>
 #define INST_MEM_SIZE 1024
 #include "../include/memory.h"
 #include "../include/pipeline.h"
-#include "memory.c"
-
+#include "../include/alu.h"
 int zeroFlag;
 int carryFlag;
 int overflowFlag;
@@ -124,11 +122,16 @@ int8_t Alu(int8_t operandA, int8_t operandB, int opcode, int8_t imm){
 
         /* 4: BEQZ — if R1==0: PC = PC+1+IMM */
         case 4:
-            if(operandA == 0)
-                pc = pc + 1 + imm;
-            else
-                pc = pc + 1;
-            outputD = (int8_t)pc;
+        //EDIT PC
+            if(operandA==0){
+                // pc= pc+1+ imm;
+                outputD=(int8_t)(IE.pc+1+imm);
+            }
+            else{
+                // pc= pc+1;
+                outputD=(int8_t)(get_pc());
+            }
+            // outputD=pc;
             break;
 
         /* 5: ANDI — R1 = R1 & IMM  (was wrongly R1 & R2) */
