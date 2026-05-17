@@ -21,6 +21,7 @@ typedef struct {
     int8_t result;
     uint16_t pc;
     int valid;
+    int branch_taken; // Flag to indicate if a branch was taken
 } PipelineStage;
 
 // Function declarations

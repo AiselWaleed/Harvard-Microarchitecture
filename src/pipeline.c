@@ -37,11 +37,12 @@ void print_binary16(uint16_t num) {
         int bit = (num >> i) & 1;
         printf("%d", bit);
         
-        // Optional: Add a space every 4 bits for readability
+        //Add a space every 4 bits for readability
         if (i % 4 == 0) printf(" ");
     }
     printf("\n");
-}
+} //printing the 16-bit inst in binary
+
 // int get_no_of_inst(short int inst_mem[]){
 //     int size = 0;
 //     int i=0;
@@ -59,14 +60,16 @@ void fetch_inst(){
     printf("fetch_inst: Current pc = %d \n", get_pc());
 
     short int fetched_instruction = fetch_instruction();
-        if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
+        //if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
+        if (get_pc() >= no_of_instructions){
             printf("fetch_inst: No more instructions to fetch");
             IF.valid =0;
             end_of_instructions = 1;
+            return;
         }
         else{
             IF.instruction = fetched_instruction;
-            IF.pc = get_pc()-1;
+            IF.pc = get_pc()-1; //ROKA when was the pc inc?
             IF.valid = 1;
             IF.inst_id = ++current_instruction;
             print_binary16((short int)fetched_instruction);
@@ -105,7 +108,7 @@ void decode(){
             int8_t raw_imm = (ID.instruction) & (0b111111);
             ID.imm = (raw_imm & 0x20) ? (int8_t)(raw_imm | ~0x3F) : (int8_t)raw_imm;          
             printf("decode: r1 = Register %d = %d \n", ID.r1, (int) ID.val1);
-            printf("decode: immediate = %d", ID.imm);
+            printf("decode: immediate = %d \n", ID.imm);
         break;
         default:
             ID.r1 = (ID.instruction >> 6) & 0b111111;
@@ -133,31 +136,42 @@ void execute(){
         return;
     printf("this is the execute method, executing instruction %d \n", IE.inst_id);
     switch(IE.opcode){
-        case 3:
+        case 3:{
             write_reg(IE.r1, IE.imm);
             printf("execute: value %d moved immediately into Register %d\n",read_reg(IE.r1), IE.r1);
-        break;
-        case 10:
+        break;}
+        case 10:{
             int8_t load_value = load_data(IE.imm);
             write_reg(IE.r1, load_value);
             printf("execute: value %d loaded into Register %d\n", read_reg(IE.r1), IE.r1);
-        break;
-        case 11:
+        break;}
+        case 11:{
             int8_t store_value = IE.val1;
             store_data(store_value, IE.imm);
             printf("execute: value %d from Register %d stored in memory\n", read_reg(IE.r1), IE.r1);
+        break;}
+        case 4:{
+            if (IE.val1 == 0){
+                uint16_t target= (uint16_t)(IE.pc +1+ IE.imm); 
+                set_pc(target);
+                IE.branch_taken = 1; // Set branch taken flag
+                //set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+                printf("execute: BEQZ executed\n");
+            }
         break;
-        case 4:
-            set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
-            printf("execute: BEQZ executed\n");
-        break;
-        case 7:
-            set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+        }
+        case 7:{
+             uint16_t target = (uint16_t)((IE.val1 << 8) | (IE.val2 & 0xFF));
+            set_pc(target);
+            IE.branch_taken = 1;
+            //set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
             printf("execute: BR executed\n");
         break;
-        default:
+        }
+        default:{
             write_reg(IE.r1,Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
             printf("execute: value inside Register %d updated\n",IE.r1);
+        }
         break;
     }
     IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
@@ -167,14 +181,16 @@ void execute(){
     // IE.result = 44;
     IE.valid=0;//commented in deb pipeline
     printf("execute: Instruction %d Executed\n", IE.inst_id);
+    printf("execute: ALU result = %d in reg %d\n ", IE.result, IE.r1);
 }
 
 void run_program(){
-    loadProgram("program1.txt");
+    loadProgram("program3.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
 
+    //while there are instructions to fetch, or instructions in the pipeline(all IE , ID, IF are not empty)
     while (!(end_of_instructions && !IE.valid && !ID.valid && !IF.valid )) {
         printf("......run_program: Cycle %d ...... \n", clock);
 
@@ -182,19 +198,20 @@ void run_program(){
             execute ();
             //IE is then invalidated
             printf("run_program: instruction %d executed \n", IE.inst_id);
-            if ((IE.opcode == 4 && IE.val1 == 0) || (IE.opcode == 7)) {
+            if(IE.branch_taken){ // Check if the executed instruction was a branch that was taken
+            //if ((IE.opcode == 4 && IE.val1 == 0) || (IE.opcode == 7)) { //BEQZ with val1=0 means branch taken, and BR is always taken
                 
                     printf("CONTROL HAZARD: Branch Taken! Flushing IF and ID buffers.\n");
                     
-                    // 1. Destroy the wrong instructions
+                    //Destroy the wrong instructions (flush)
                     IF.valid = 0;
                     ID.valid = 0;
-                    
-                    // 2. Force the Memory's PC to the new branch target
-                    // IE.result holds the new PC calculated by the ALU
+                    IE.branch_taken = 0; // Reset branch taken flag for the next instruction
+                    clock++;
+                    continue;
                     // pc= IE.result; // get current PC
-                    uint16_t new_pc = (0x00FF) & IE.result;
-                    set_pc(new_pc);
+                    //uint16_t new_pc = (0x00FF) & IE.result; //Roka ???
+                    //set_pc(new_pc);
             }
 
         }
@@ -211,18 +228,14 @@ void run_program(){
         }
 
 
-        if (!IE.valid && ID.valid){
-            // int hazard = is_data_hazard();
-            // if (!hazard){
-            IE = ID;
-            IE.valid = 1;
+        if (!IE.valid && ID.valid){ //ID->IE (if the decode is done and IE is empty)
+
+            IE = ID; //copy struct
+            //update validity of IE and ID
+            IE.valid = 1; 
             ID.valid = 0;
             printf("instruction %d is passed to execute phase \n", IE.inst_id);
-            // }
-            // else{ //HAZARD!
-            //     printf("run_program: Stalling pipeline due to hazard in instruction %d \n", ID.inst_id);
-            //     IE.valid = 0; //stall IE
-            // }
+
            
         }
         if (!ID.valid && IF.valid){
