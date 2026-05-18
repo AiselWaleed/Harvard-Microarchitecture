@@ -5,10 +5,11 @@
 #include <string.h>
 #include <stdint.h>
 
-static short int parsedInstruction = 0;
-static int R1 = 0;
-static int R2 = 0;
-static int imm = 0;
+short int parsedInstruction = 0;
+int R1 = 0;
+int R2 = 0;
+int imm = 0;
+int shift = 0;
 
 void extractOperands(const char *instruction, int *r1, int *r2, int i)
 {
@@ -28,6 +29,8 @@ void extractOperands(const char *instruction, int *r1, int *r2, int i)
 // parser
 void parseInstruction(const char *instruction)
 {
+    shift = 0;
+    imm = 0;
     if (instruction == NULL)
     {
         fprintf(stderr, "Error: Null instruction string\n");
@@ -88,6 +91,7 @@ void parseInstruction(const char *instruction)
     // SLC - opcode 8
     else if (strncmp(instruction, "SLC", 3) == 0)
     {
+        shift = 1;
         extractOperands(instruction, &R1, &R2, 1);
         if (R2 < 0)
             printf("Warning: Shift value for SLC cannot be negative\n");
@@ -97,6 +101,7 @@ void parseInstruction(const char *instruction)
     else if (strncmp(instruction, "SRC", 3) == 0)
     {
         extractOperands(instruction, &R1, &R2, 1);
+        shift = 1;
         if (R2 < 0)
             printf("Warning: Shift value for SRC cannot be negative\n");
         parsedInstruction |= (0b1001 << 12);
@@ -119,9 +124,9 @@ void parseInstruction(const char *instruction)
     // error handling for value bounds
     if (R1 < 0 || R1 > 63)
         printf("Warning: Register R%d out of bounds (must be between 0 and 63)\n", R1);
-    if (imm == 0 && (R2 < 0 || R2 > 63))
+    if (imm == 0 && (R2 < 0 || R2 > 63) && shift == 0)
         printf("Warning: Register R%d out of bounds (must be between 0 and 63)\n", R2);
-    if (imm == 1 && (R2 > 31 || R2 < -32))
+    if (imm == 1 && (R2 > 31 || R2 < -32) && shift == 0)
         printf("Warning: Immediate value %d out of bounds (must be between -32 and 31)\n", R2);
 
     parsedInstruction |= (R1 & 0x3F) << 6;
