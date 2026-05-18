@@ -137,13 +137,22 @@ void execute(){
     printf("this is the execute method, executing instruction %d \n", IE.inst_id);
     switch(IE.opcode){
         case 3:{
-            write_reg(IE.r1, IE.imm);
-            printf("execute: value %d moved immediately into Register %d\n",read_reg(IE.r1), IE.r1);
+            IE.result = IE.imm;
+            if (IE.r1!=0){
+                write_reg(IE.r1, IE.imm);
+                printf("execute: value %d moved immediately into Register %d\n",read_reg(IE.r1), IE.r1);
+            }
+            else
+                printf("execute: MOVI instruction failed, R0 cannot be overwritten");
         break;}
         case 10:{
             int8_t load_value = load_data(IE.imm);
-            write_reg(IE.r1, load_value);
-            printf("execute: value %d loaded into Register %d\n", read_reg(IE.r1), IE.r1);
+            if (IE.r1!=0){
+                write_reg(IE.r1, load_value);
+                printf("execute: value %d loaded into Register %d\n", read_reg(IE.r1), IE.r1);
+            }
+            else
+                printf("execute: LDR instruction failed, R0 cannot be overwritten",read_reg(IE.r1), IE.r1);
         break;}
         case 11:{
             int8_t store_value = IE.val1;
@@ -169,10 +178,14 @@ void execute(){
         break;
         }
         default:{
-            write_reg(IE.r1,Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
-            printf("execute: value inside Register %d updated\n",IE.r1);
-        }
+            if (IE.r1!=0){
+                write_reg(IE.r1,Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+                printf("execute: value inside Register %d updated\n",IE.r1);
+            }
+            else
+                printf("execute: Execution failed. R0 cannot be overwritten.");
         break;
+        }
     }
     IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
     //TEMP

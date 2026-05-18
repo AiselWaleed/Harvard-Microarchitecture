@@ -31,7 +31,7 @@ int* DtoB(int decimal, int result[], int size){
 }
 
 int updateCarry(int flag, int8_t a, int8_t b, int opcode){
-    if(opcode == 0){
+    if(opcode == 0){ //ADD
         uint16_t s = (uint16_t)(uint8_t)a + (uint16_t)(uint8_t)b;
         flag = s > 0x7F;
     }
@@ -43,6 +43,22 @@ int updateCarry(int flag, int8_t a, int8_t b, int opcode){
     }
     return flag;
 }
+
+// int updateCarry(int flag, int8_t a, int8_t b, int opcode){
+//     if(opcode == 0){ //ADD
+//         uint16_t s = (uint16_t)(uint8_t)a + (uint16_t)(uint8_t)b;
+//         // flag = s > 0x7F;
+//         flag = (s & 0x0100 == 0x0100);
+//     }
+//     // else if(opcode == 1){
+//     //     flag = ((uint8_t)a < (uint8_t)b) ? 1 : 0;
+//     // }
+//     // else{
+//     //     flag = 0;
+//     // }
+//     return flag;
+// }
+
 
 int updateOverFlow(int flag, int8_t reg1, int8_t reg2, int opcode, int8_t result){
     if(opcode == 0){
@@ -68,6 +84,7 @@ int updateNegative(int flag, int8_t out){
     return flag;
 }
 
+//A: should be updated whenever either is
 int updateSign(int signFlag, int negativeFlag, int overflowFlag){
     signFlag = (negativeFlag != overflowFlag) ? 1 : 0;
     return signFlag;
@@ -150,7 +167,7 @@ int8_t Alu(int8_t operandA, int8_t operandB, int opcode, int8_t imm){
 
         /* 7: BR — PC = R1 || R2 (concatenation, caller reads pc) */
         case 7:
-            pc      = ((int)(uint8_t)operandA << 6) | (uint8_t)operandB;
+            pc      = ((int)(uint8_t)operandA << 8) | (uint8_t)operandB;//A: CHEECK IN EXECUTE()
             outputD = 0;   /* result too wide for int8_t; caller reads pc */
             break;
 
