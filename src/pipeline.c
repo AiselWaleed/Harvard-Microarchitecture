@@ -9,7 +9,7 @@ int clock;
 // int global_pc;
 int no_of_instructions;
 int end_of_instructions;
-
+int countf;
 PipelineStage IF= {0};
 PipelineStage ID= {0};
 PipelineStage IE= {0};
@@ -20,6 +20,7 @@ void init_pipeline(){
     no_of_instructions = 0;
     current_instruction = 0;
     end_of_instructions = 0;
+    countf=-1;
     printf("Pipelining initiated \n");
     //TEMP: sample parsed insts, later to be taken from memory
     // instruction_memory [0] = (0b1111000011110000);
@@ -93,25 +94,66 @@ void print_binary16(uint16_t num) {
 //     printf("\033[1mInstruction %d\033[0m fetched\n", IF.inst_id);
 
 // }
-void fetch_inst(){
-    printf("fetch_inst: Current pc = %d \n", get_pc());
+// void fetch_inst(){
+//     printf("fetch_inst: Current pc = %d \n", get_pc());
 
-    short int fetched_instruction = fetch_instruction();
-        //if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
-        if (get_pc() > no_of_instructions){
-            printf("fetch_inst: No more instructions to fetch\n");
-            IF.valid =0;
-            end_of_instructions = 1;
-            return;
+//     short int fetched_instruction = fetch_instruction();
+//         //if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
+//         if (get_pc() > no_of_instructions || fetched_instruction==-1){
+//             printf("fetch_inst: No more instructions to fetch\n");
+//             IF.valid =0;
+//             end_of_instructions = 1;
+//             return;
+//         }
+//         else{
+//             IF.instruction = fetched_instruction;
+//             IF.pc = get_pc()-1; //ROKA when was the pc inc?
+//             IF.valid = 1;
+//             IF.inst_id = ++current_instruction;
+//             print_binary16((short int)fetched_instruction);
+//         }
+//     //data check?
+// }
+
+// Pure Helper: Safely reads from instruction memory without changing global states
+
+
+// Pipeline Phase: Handles the IF Stage execution logic
+void fetch_inst() {
+    printf("\033[1mFETCH\033[0m\n");
+    printf("Fetching Instruction %d \n", get_pc()+1);
+    uint16_t current_pc = get_pc();
+    printf("Current PC = %d\n", current_pc);
+
+    // Stop fetching if PC exceeds the number of instructions loaded during parsing
+    if (current_pc >= no_of_instructions) {
+        printf("fetch_inst: No more instructions to fetch (PC out of bounds)\n");
+        countf++;
+        IF.valid = 0; 
+        // Note: Do not set global 'end_of_instructions = 1' here yet! 
+        // Let the remaining instructions currently in ID and EX finish running first.
+        if (countf==1){
+            end_of_instructions=1;
         }
-        else{
-            IF.instruction = fetched_instruction;
-            IF.pc = get_pc()-1; //ROKA when was the pc inc?
-            IF.valid = 1;
-            IF.inst_id = ++current_instruction;
-            print_binary16((short int)fetched_instruction);
-        }
-    //data check?
+        return;
+    }
+
+    short int fetched_instruction = read_instruction_memory(current_pc);
+    
+    if (fetched_instruction == -1) {
+        IF.valid = 0;
+        return;
+    }
+
+    // Populate pipeline intermediate registers
+    IF.instruction = fetched_instruction;
+    IF.pc = current_pc; // Storing original PC for accurate branch evaluations later
+    IF.valid = 1;
+    IF.inst_id = current_pc+1;
+    print_binary16(fetched_instruction);
+
+    // Unified PC State Update
+    set_pc(current_pc + 1); 
 }
 
 void decode(){
@@ -248,7 +290,7 @@ void execute(){
 }
 
 void run_program(){
-    loadProgram("program3.txt");
+    loadProgram("program5.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
@@ -270,6 +312,7 @@ void run_program(){
                     //Destroy the wrong instructions (flush)
                     IF.valid = 0;
                     ID.valid = 0;
+                    countf=-1;
                     IE.branch_taken = 0; // Reset branch taken flag for the next instruction
                     clock++;
                     continue;
