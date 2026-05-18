@@ -15,6 +15,9 @@ int8_t load_data(uint16_t index);
 short int read_instruction_memory(uint16_t address);
 void print_nonzero_data(void);
 
+// Print instruction memory content (non-empty entries)
+void print_instruction_memory(void);
+
 // void store_data(int8_t data);
 void store_data(int8_t data, uint16_t index);
 int8_t read_reg(int index);
