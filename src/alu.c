@@ -32,16 +32,22 @@ int* DtoB(int decimal, int result[], int size){
 
 int updateCarry(int flag, int8_t a, int8_t b, int opcode){
     if(opcode == 0){ //ADD
-        uint16_t s = (uint16_t)(uint8_t)a + (uint16_t)(uint8_t)b;
-        flag = s > 0x7F;
+        uint16_t s = (uint16_t)((uint8_t)a) + (uint16_t)((uint8_t)b);
+        // flag = s > 0xFF;
+        flag = (s >> 8) & 1;
     }
-    else if(opcode == 1){
-        flag = ((uint8_t)a < (uint8_t)b) ? 1 : 0;
-    }
+
     else{
         flag = 0;
     }
     return flag;
+}
+void clear_flags(){
+    zeroFlag     = 0;
+    carryFlag    = 0;
+    overflowFlag = 0;
+    negativeFlag = 0;
+    signFlag     = 0;
 }
 
 // int updateCarry(int flag, int8_t a, int8_t b, int opcode){
@@ -209,8 +215,7 @@ int8_t Alu(int8_t operandA, int8_t operandB, int opcode, int8_t imm){
 }
 
 void printFlags(){
-    printf("  Flags -> C:%d  V:%d  N:%d  S:%d  Z:%d\n",
-           carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
+    printf("Flags -> C:%d  V:%d  N:%d  S:%d  Z:%d\n",carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
 }
 
 // int main(){

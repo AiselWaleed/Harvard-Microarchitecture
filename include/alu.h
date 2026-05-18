@@ -9,4 +9,5 @@ void printFlags();
 int updateCarry(int flag, int8_t reg1, int8_t reg2, int opcode);
 int updateOverFlow(int flag, int8_t reg1, int8_t reg2, int opcode, int8_t result);
 int updateNegative(int flag, int8_t out);   
+void clear_flags();
 #endif
