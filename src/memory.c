@@ -101,3 +101,26 @@ for (int i = 0; i < 1024; i++) {
     }
 
 }
+
+void print_instruction_memory(void) {
+    printf("\n... \033[1mInstruction Memory\033[0m ...\n");
+    int printed = 0;
+    for (int i = 0; i < 1024; i++) {
+        short int inst = instruction_memory[i];
+        /* 0xFFFF is used as the empty sentinel in init_memory */
+        if ((uint16_t)inst != 0xFFFF && (uint16_t)inst != 0x0000) {
+            uint16_t uinst = (uint16_t)inst;
+            printf("Instr[%d] = 0x%04X (%u) ", i, uinst, (unsigned)uinst);
+            for (int b = 15; b >= 0; b--) {
+                putchar(((uinst >> b) & 1) ? '1' : '0');
+                if (b % 4 == 0)
+                    putchar(' ');
+            }
+            putchar('\n');
+            printed = 1;
+        }
+    }
+    if (!printed) {
+        printf("Instruction memory empty.\n");
+    }
+}

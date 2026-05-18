@@ -183,7 +183,7 @@ void execute(){
 }
 
 void run_program(){
-    loadProgram("program11.txt");
+    loadProgram("program5.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
@@ -291,6 +291,7 @@ int main (){
     run_program();
     // printf("final pc= %d", get_pc());
     print_final_state();
+    print_instruction_memory();
 
     return 0;
 }
