@@ -92,3 +92,12 @@ void print_nonzero_gprs(void)
         printf("All GPRs are zero.\n");
     }
 }
+void print_nonzero_data(void){
+for (int i = 0; i < 1024; i++) {
+        int8_t val = load_data(i);
+        if (val != 0) { // Only printing non-zero memory 34an keda hanroo7 libya 
+            printf("Address [%d] = %d\n", i, val);
+        }
+    }
+
+}
