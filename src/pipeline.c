@@ -62,7 +62,7 @@ void fetch_inst(){
     short int fetched_instruction = fetch_instruction();
         //if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
         if (get_pc() > no_of_instructions){
-            printf("fetch_inst: No more instructions to fetch");
+            printf("fetch_inst: No more instructions to fetch\n");
             IF.valid =0;
             end_of_instructions = 1;
             return;
@@ -140,7 +140,7 @@ void execute(){
             IE.result = IE.imm;
             if (IE.r1!=0){
                 write_reg(IE.r1, IE.imm);
-                printf("execute: value %d moved immediately into Register %d\n",read_reg(IE.r1), IE.r1);
+                printf("execute: value %d moved into Register %d\n",read_reg(IE.r1), IE.r1);
             }
             else
                 printf("execute: MOVI instruction failed, R0 cannot be overwritten");
@@ -160,11 +160,13 @@ void execute(){
             printf("execute: value %d from Register %d stored in memory[%d]\n", read_reg(IE.r1), IE.r1, IE.imm);
         break;}
         case 4:{
+            IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
+            printf("execute: ALU result = %d", IE.result);
             if (IE.val1 == 0){
                 // uint16_t target= (uint16_t)(IE.pc +1+ IE.imm); 
                 // set_pc(target);
                 IE.branch_taken = 1; // Set branch taken flag
-                set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+                set_pc(IE.result);
                 printf("execute: BEQZ executed\n");
             }
         break;
@@ -173,34 +175,36 @@ void execute(){
             //  uint16_t target = (uint16_t)((IE.val1 << 8) | (IE.val2 & 0xFF));
             // set_pc(target);
             IE.branch_taken = 1;
-            set_pc(Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+            IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
+            set_pc(IE.result);
+            printf("execute: ALU result = %d", IE.result);
             printf("execute: BR executed\n");
         break;
         }
         default:{
+            IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);  
+            printf("execute: ALU result = %d\n", IE.result);
             if (IE.r1!=0){
-                write_reg(IE.r1,Alu(IE.val1, IE.val2,IE.opcode, IE.imm));
+                write_reg(IE.r1,IE.result);
                 printf("execute: value inside Register %d updated\n",IE.r1);
             }
             else
-                printf("execute: Execution failed. R0 cannot be overwritten.");
+                printf("execute: Execution failed. R0 cannot be overwritten.\n");
         break;
         }
     }
-    IE.result = Alu(IE.val1, IE.val2,IE.opcode, IE.imm);
     //TEMP
     // IE.val1=66;
     // IE.val2=88;
     // IE.result = 44;
     IE.valid=0;//commented in deb pipeline
     printf("execute: Instruction %d Executed\n", IE.inst_id);
-    printf("execute: ALU result = %d in reg %d\n ", IE.result, IE.r1);
     print_nonzero_gprs();
     printFlags();
 }
 
 void run_program(){
-    loadProgram("program9.txt");
+    loadProgram("program10.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
@@ -249,7 +253,7 @@ void run_program(){
             //update validity of IE and ID
             IE.valid = 1; 
             ID.valid = 0;
-            printf("instruction %d is passed to execute phase \n", IE.inst_id);
+            printf("instruction %d is passed to execute stage \n", IE.inst_id);
 
            
         }
@@ -257,7 +261,7 @@ void run_program(){
             ID = IF;
             ID.valid = 1;
             IF.valid = 0;
-            printf("instruction %d is passed to decode phase \n", ID.inst_id);
+            printf("instruction %d is passed to decode stage \n", ID.inst_id);
         }
         
         
