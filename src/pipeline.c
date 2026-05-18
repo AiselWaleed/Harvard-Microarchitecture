@@ -290,7 +290,7 @@ void execute(){
 }
 
 void run_program(){
-    loadProgram("program5.txt");
+    loadProgram("program3.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
