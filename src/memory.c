@@ -37,6 +37,18 @@ void set_pc(uint16_t new_pc){
 int get_no_of_instructions(){
     return counti;
 }
+// short int fetch_instruction(){
+//     if (get_pc() >= 1023)
+//         return -1;
+//     if (get_pc() >= get_no_of_instructions() || instruction_memory[pc] == 0xFFFF){
+//         printf("fetch_instruction: No more instructions to fetch");
+//         return -1;
+//         //is that okay?
+//     }
+//     //UNIFY PC INCREMENT
+//     return instruction_memory[pc++];
+// }
+
 short int fetch_instruction(){
     if (pc >= 1023)
         return -1;
