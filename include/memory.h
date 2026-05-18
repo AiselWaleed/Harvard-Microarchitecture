@@ -13,7 +13,7 @@ short int fetch_instruction(void);
 // int8_t load_data(int8_t index);
 int8_t load_data(uint16_t index);
 short int read_instruction_memory(uint16_t address);
-
+void print_nonzero_data(void);
 
 // void store_data(int8_t data);
 void store_data(int8_t data, uint16_t index);

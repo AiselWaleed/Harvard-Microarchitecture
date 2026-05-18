@@ -287,6 +287,7 @@ void execute(){
     IE.valid=0;//commented in deb pipeline
     printf("Instruction %d Executed\n", IE.inst_id);
     print_nonzero_gprs();
+    print_nonzero_data();
     printFlags();
 }
 
