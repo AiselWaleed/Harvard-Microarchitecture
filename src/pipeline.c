@@ -61,7 +61,7 @@ void fetch_inst(){
 
     short int fetched_instruction = fetch_instruction();
         //if (fetched_instruction == -1 || current_instruction==get_no_of_instructions()){
-        if (get_pc() >= no_of_instructions){
+        if (get_pc() > no_of_instructions){
             printf("fetch_inst: No more instructions to fetch");
             IF.valid =0;
             end_of_instructions = 1;
@@ -148,7 +148,7 @@ void execute(){
         case 11:{
             int8_t store_value = IE.val1;
             store_data(store_value, IE.imm);
-            printf("execute: value %d from Register %d stored in memory\n", read_reg(IE.r1), IE.r1);
+            printf("execute: value %d from Register %d stored in memory[%d]\n", read_reg(IE.r1), IE.r1, IE.imm);
         break;}
         case 4:{
             if (IE.val1 == 0){
@@ -182,10 +182,12 @@ void execute(){
     IE.valid=0;//commented in deb pipeline
     printf("execute: Instruction %d Executed\n", IE.inst_id);
     printf("execute: ALU result = %d in reg %d\n ", IE.result, IE.r1);
+    print_nonzero_gprs();
+    printFlags();
 }
 
 void run_program(){
-    loadProgram("program3.txt");
+    loadProgram("program4.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
@@ -254,8 +256,51 @@ void run_program(){
 }
 
 
+extern int carryFlag;
+extern int overflowFlag;
+extern int negativeFlag;
+extern int signFlag;
+extern int zeroFlag;
+
+void print_final_state() {
+    printf("\n.........................................\n");
+    printf("         FINAL PROCESSOR STATE\n");
+    printf(".........................................\n");
+    printf("Program Counter (PC): %d\n", get_pc());
+
+    //Status Register (SREG)
+    printf("Status Register (SREG) Flags:\n");
+    printf("  Carry: %d | Overflow: %d | Negative: %d | Sign: %d | Zero: %d\n", 
+            carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
+
+    //Register File
+    printf("\n... General Purpose Registers ...\n");
+    for (int i = 0; i < 64; i++) {
+        int8_t val = read_reg(i);
+        printf("R%d: %d\n", i, val);
+    }
+
+    //Data Memory
+    printf("\n... Data Memory ...\n");
+    for (int i = 0; i < 1024; i++) {
+        int8_t val = load_data(i);
+        if (val != 0) { // Only printing non-zero memory 34an keda hanroo7 libya 
+            printf("Address [%d] = %d\n", i, val);
+        }
+    }
+
+    printf(".........................................\n\n");
+}
+
+
+
+
+
 int main (){
     init_pipeline();
     run_program();
+    printf("final pc= %d", get_pc());
+    print_final_state();
+
     return 0;
 }
