@@ -49,16 +49,22 @@ int get_no_of_instructions(){
 //     return instruction_memory[pc++];
 // }
 
-short int fetch_instruction(){
-    if (pc >= 1023)
-        return -1;
-    if (instruction_memory[pc] == 0xFFFF){
-        printf("fetch_instruction: No more instructions to fetch");
-        return -1;
-        //is that okay?
+// short int fetch_instruction(){
+//     if (pc >= 1023)
+//         return -1;
+//     if (get_pc() > get_no_of_instructions() || instruction_memory[pc] == 0xFFFF){
+//         printf("fetch_instruction: No more instructions to fetch");
+//         return -1;
+//         //is that okay?
+//     }
+//     //UNIFY PC INCREMENT
+//     return instruction_memory[pc++];
+// }
+short int read_instruction_memory(uint16_t address) {
+    if (address >= 1024) { // Fixed boundary bug (0 to 1023 are valid)
+        return -1; 
     }
-    //UNIFY PC INCREMENT
-    return instruction_memory[pc++];
+    return instruction_memory[address];
 }
 
 int8_t load_data(uint16_t index){
