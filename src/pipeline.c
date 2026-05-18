@@ -121,13 +121,13 @@ void print_binary16(uint16_t num) {
 // Pipeline Phase: Handles the IF Stage execution logic
 void fetch_inst() {
     printf("\033[1mFETCH\033[0m\n");
-    printf("Fetching Instruction %d \n", get_pc()+1);
+    printf("Fetching \033[1mInstruction %d\033[0m\n", get_pc()+1);
     uint16_t current_pc = get_pc();
-    printf("Current PC = %d\n", current_pc);
+    printf("\033[1mCurrent PC =\033[0m %d\n", current_pc);
 
     // Stop fetching if PC exceeds the number of instructions loaded during parsing
     if (current_pc >= no_of_instructions) {
-        printf("fetch_inst: No more instructions to fetch (PC out of bounds)\n");
+        printf("No more instructions to fetch!\n");
         countf++;
         IF.valid = 0; 
         // Note: Do not set global 'end_of_instructions = 1' here yet! 
@@ -161,7 +161,7 @@ void decode(){
         return;
     // printf("this is the decode method, decoding instruction %d \n", ID.inst_id);
     printf("\033[1mDECODE\033[0m\n");
-    printf("Decoding Instruction %d \n", ID.inst_id);
+    printf("Decoding \033[1mInstruction %d\033[0m \n", ID.inst_id);
 
     int current_opcode = (ID.instruction >> 12) & 0b1111 ;
     ID.opcode = current_opcode;
@@ -211,16 +211,17 @@ void decode(){
     // ID.r1 = ID.instruction & (0b111111 << 6);
     // ID.r2 = ID.instruction & (0b111111);
     // ID.imm = ID.instruction & (0b111111);
-    printf("\033[1mInstruction %d\033[0m decoded\n", ID.inst_id);
+    printf("Instruction %d decoded\n", ID.inst_id);
 }
 
 
 void execute(){
     if (!IE.valid)
         return;
+    clear_flags();
     // printf("this is the execute method, executing instruction %d \n", IE.inst_id);
     printf("\033[1mEXECUTE\033[0m\n");
-    printf("Executing Instruction %d \n", IE.inst_id);
+    printf("Executing \033[1mInstruction %d\033[0m\n", IE.inst_id);
     switch(IE.opcode){
         case 3:{
             IE.result = IE.imm;
@@ -284,13 +285,13 @@ void execute(){
     // IE.val2=88;
     // IE.result = 44;
     IE.valid=0;//commented in deb pipeline
-    printf("\033[1mInstruction %d\033[0m Executed\n", IE.inst_id);
+    printf("Instruction %d Executed\n", IE.inst_id);
     print_nonzero_gprs();
     printFlags();
 }
 
 void run_program(){
-    loadProgram("program3.txt");
+    loadProgram("program11.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
@@ -383,25 +384,25 @@ extern int zeroFlag;
 
 void print_final_state() {
     printf("\n.........................................\n");
-    printf("         FINAL PROCESSOR STATE\n");
+    printf("         \033[1mFINAL PROCESSOR STATE\033[0m\n");
     printf(".........................................\n");
-    printf("Program Counter (PC): %d\n", get_pc());
+    printf("\033[1mProgram Counter (PC):\033[0m %d\n", get_pc());
 
     //Status Register (SREG)
-    printf("Status Register (SREG) Flags:\n");
+    printf("\033[1mStatus Register (SREG) Flags:\033[0m\n");
     // printf("  Carry: %d | Overflow: %d | Negative: %d | Sign: %d | Zero: %d\n", 
     //         carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
     printFlags();
 
     //Register File
-    printf("\n... General Purpose Registers ...\n");
+    printf("\n... \033[1mGeneral Purpose Registers\033[0m ...\n");
     for (int i = 0; i < 64; i++) {
         int8_t val = read_reg(i);
         printf("R%d: %d\n", i, val);
     }
 
     //Data Memory
-    printf("\n... Data Memory ...\n");
+    printf("\n... \033[1mData Memory\033[0m ...\n");
     for (int i = 0; i < 1024; i++) {
         int8_t val = load_data(i);
         if (val != 0) { // Only printing non-zero memory 34an keda hanroo7 libya 
@@ -419,7 +420,7 @@ void print_final_state() {
 int main (){
     init_pipeline();
     run_program();
-    printf("final pc= %d", get_pc());
+    // printf("final pc= %d", get_pc());
     print_final_state();
 
     return 0;
