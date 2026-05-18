@@ -41,7 +41,7 @@ short int fetch_instruction(){
     if (pc >= 1023)
         return -1;
     if (instruction_memory[pc] == 0xFFFF){
-        printf("fetch_inst: No more instructions to fetch");
+        printf("fetch_instruction: No more instructions to fetch");
         return -1;
         //is that okay?
     }

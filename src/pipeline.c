@@ -200,7 +200,7 @@ void execute(){
 }
 
 void run_program(){
-    loadProgram("program4.txt");
+    loadProgram("program9.txt");
     no_of_instructions = get_no_of_instructions();
     if (no_of_instructions==0)
         return;
@@ -283,8 +283,9 @@ void print_final_state() {
 
     //Status Register (SREG)
     printf("Status Register (SREG) Flags:\n");
-    printf("  Carry: %d | Overflow: %d | Negative: %d | Sign: %d | Zero: %d\n", 
-            carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
+    // printf("  Carry: %d | Overflow: %d | Negative: %d | Sign: %d | Zero: %d\n", 
+    //         carryFlag, overflowFlag, negativeFlag, signFlag, zeroFlag);
+    printFlags();
 
     //Register File
     printf("\n... General Purpose Registers ...\n");
