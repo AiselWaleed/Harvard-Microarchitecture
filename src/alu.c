@@ -169,6 +169,8 @@ int8_t Alu(int8_t operandA, int8_t operandB, int opcode, int8_t imm){
         case 7:
             outputD      = ((int)(uint8_t)operandA << 8) | (uint8_t)operandB;//A: CHEECK IN EXECUTE()
             // outputD = 0;   /* result too wide for int8_t; caller reads pc */
+            //pc      = ((int)(uint8_t)operandA << 8) | (uint8_t)operandB;//A: CHEECK IN EXECUTE()
+            outputD = ((int)(uint8_t)operandA << 8) | (uint8_t)operandB;
             break;
 
         /* 8: SLC — R1 = R1 << IMM | R1 >>> (8-IMM)  circular left shift */
